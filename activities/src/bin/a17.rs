@@ -12,4 +12,9 @@
 //   to uppercase and lowercase
 //   * Try searching for: to_uppercase, to_lowercase
 
-fn main() {}
+fn main() {
+  let my_string = "Hello, World!";
+  println!("{my_string}");
+  println!("Uppercase: {}", my_string.to_uppercase());
+  println!("Lowercase: {}", my_string.to_lowercase());
+}
