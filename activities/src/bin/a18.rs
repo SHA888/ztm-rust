@@ -11,4 +11,18 @@
 // * Return a result from the function
 // * The Err variant should detail the reason why they cannot make a purchase
 
-fn main() {}
+struct Customer {
+  age: i32,
+}
+
+fn try_purchase(customer: &Customer) -> Result<(), String> {
+  if customer.age < 21 {
+    Err("You must be at least 21 years old".to_owned())
+  } else {
+    Ok(())
+  }
+}
+fn main() {
+  let bob = Customer { age: 20 };
+  println!("{:?}", try_purchase(&bob));
+}
