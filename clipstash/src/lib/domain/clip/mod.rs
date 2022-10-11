@@ -1,6 +1,6 @@
 pub mod field;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -18,7 +18,7 @@ pub enum ClipError {
     #[error("id parse error: {0}")]
     Id(#[from] uuid::Error),
     #[error("hits parse error: {0}")]
-    Hits(#[from] std::num::TryFromIntError)
+    Hits(#[from] std::num::TryFromIntError),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
