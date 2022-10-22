@@ -1,3 +1,4 @@
+pub mod model;
 use derive_more::{Display, From};
 use serde::{Deserialize, Serialize};
 use sqlx::Sqlite;
@@ -37,7 +38,6 @@ impl Database<Sqlite> {
         &self.0
     }
 }
-
 
 #[derive(Clone, Debug, Deserialize, Display, From, Serialize)]
 pub struct DbId(Uuid);

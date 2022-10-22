@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
-use derive_more::Constructor;
 use crate::data::DbId;
+use derive_more::Constructor;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Constructor, Debug, Deserialize, Serialize)]
 pub struct ClipId(DbId);
