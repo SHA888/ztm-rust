@@ -71,7 +71,7 @@ pub struct NewClip {
 
 impl From<crate::service::ask::NewClip> for NewClip {
     fn from(req: crate::service::ask::NewClip) -> Self {
-        Self { 
+        Self {
             clip_id: DbId::new().into(),
             content: req.content.into_inner(),
             title: req.title.into_inner(),
