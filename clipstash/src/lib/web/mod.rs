@@ -1,8 +1,9 @@
 // use handlebars::RenderError;
 
 pub mod ctx;
-pub mod renderer;
 pub mod form;
+pub mod renderer;
+pub mod http;
 
 #[derive(rocket::Responder)]
 pub enum PageError {
@@ -18,12 +19,12 @@ pub enum PageError {
 
 impl From<handlebars::RenderError> for PageError {
     fn from(err: handlebars::RenderError) -> Self {
-      PageError::Render(format!("{}", err))
+        PageError::Render(format!("{}", err))
     }
 }
 
 impl From<serde_json::Error> for PageError {
     fn from(err: serde_json::Error) -> Self {
-      PageError::Serialization(format!("{}", err))
+        PageError::Serialization(format!("{}", err))
     }
 }
