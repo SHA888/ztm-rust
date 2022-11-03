@@ -2,15 +2,15 @@ use crate::{
     data::AppDatabase,
     service::action,
     web::{ctx, form, renderer::Renderer, PageError},
-    ServiceError, ShortCode
+    ServiceError, ShortCode,
 };
+use rocket::response::content::RawHtml;
 use rocket::{
     form::{Contextual, Form},
     http::{Cookie, CookieJar, Status},
     response::{status, Redirect},
-    uri, State
+    uri, State,
 };
-use rocket::response::content::RawHtml;
 
 #[rocket::get("/")]
 fn home(renderer: &State<Renderer<'_>>) -> RawHtml<String> {
