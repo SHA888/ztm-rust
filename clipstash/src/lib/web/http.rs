@@ -5,7 +5,7 @@ use crate::{
     ServiceError, ShortCode,
 };
 use rocket::{response::content::RawHtml}; 
-use rocket::form::prelude::context;
+// use rocket::form::prelude::context;
 use rocket::{
     form::{Contextual, Form},
     http::{Cookie, CookieJar, Status},
@@ -34,7 +34,7 @@ pub async fn get_clip(
     ) -> Result<status::Custom<RawHtml<String>>, PageError> {
         Ok(status::Custom(status, RawHtml(renderer.render(context, &[]))))
     }
-    match action::get_clip(shortcode.clone.into(), database.get_pool()).await {
+    match action::get_clip(shortcode.clone().into(), database.get_pool()).await {
         Ok(clip) => {
             let context = ctx::ViewClip::new(clip);
             render_with_status(Status::Ok, context, renderer)
