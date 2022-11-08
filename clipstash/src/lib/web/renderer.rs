@@ -9,10 +9,10 @@ pub enum RenderError {
 pub struct Renderer<'a>(handlebars::Handlebars<'a>);
 
 impl<'a> Renderer<'a> {
-    pub fn new(template_dit: std::path::PathBuf) -> Self {
+    pub fn new(template_dir: std::path::PathBuf) -> Self {
         let mut renderer = handlebars::Handlebars::new();
         renderer
-            .register_templates_directory(".hbs", &template_dit)
+            .register_templates_directory(".hbs", &template_dir)
             .expect("failed to register handlebars templetes");
         Self(renderer)
     }
