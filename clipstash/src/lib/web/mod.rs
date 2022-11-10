@@ -1,9 +1,8 @@
-// use handlebars::RenderError;
-
 pub mod ctx;
 pub mod form;
 pub mod http;
 pub mod renderer;
+pub mod hitcounter;
 
 pub const PASSWORD_COOKIE: &str = "password";
 
