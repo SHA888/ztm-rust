@@ -13,8 +13,6 @@ pub async fn end_transaction(transaction: Transaction<'_>) -> Result<(), Service
     Ok(transaction.commit().await?)
 }
 
-
-
 pub async fn increase_hit_count(
     shortcode: &ShortCode,
     hits: u32,

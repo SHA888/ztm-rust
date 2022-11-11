@@ -126,20 +126,20 @@ pub async fn submit_clip_password(
                     form.password.clone().into_inner().unwrap_or_default(),
                 ));
                 Ok(RawHtml(renderer.render(context, &[])))
-            },
+            }
             Err(e) => match e {
                 ServiceError::PermissionError(e) => {
                     let context = ctx::PasswordRequired::new(shortcode);
                     Ok(RawHtml(renderer.render(context, &[e.as_str()])))
-                },
+                }
                 ServiceError::NotFound => Err(PageError::NotFound("Clip not found".to_owned())),
-                _ => Err(PageError::Internal("server error".to_owned()))
-            }
+                _ => Err(PageError::Internal("server error".to_owned())),
+            },
         }
     } else {
         let context = ctx::PasswordRequired::new(shortcode);
         Ok(RawHtml(renderer.render(
-            context, 
+            context,
             &["A Password is required to view this clip"],
         )))
     }
@@ -162,15 +162,12 @@ pub async fn get_raw_clip(
             .unwrap_or_else(Password::default),
     };
     match action::get_clip(req, database.get_pool()).await {
-        Ok(clip) => {
-            Ok(status::Custom(Status::Ok, clip.content.into_inner()))
-        }
+        Ok(clip) => Ok(status::Custom(Status::Ok, clip.content.into_inner())),
         Err(e) => match e {
             ServiceError::PermissionError(msg) => Ok(status::Custom(Status::Unauthorized, msg)),
             ServiceError::NotFound => Err(Status::NotFound),
             _ => Err(Status::InternalServerError),
-
-        }
+        },
     }
 }
 

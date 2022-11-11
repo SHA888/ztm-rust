@@ -1,5 +1,5 @@
 use clipstash::data::AppDatabase;
-use clipstash::web::{renderer::Renderer, hitcounter::HitCounter};
+use clipstash::web::{hitcounter::HitCounter, renderer::Renderer};
 use dotenv::dotenv;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -22,13 +22,15 @@ fn main() {
     let handle = rt.handle().clone();
     let renderer = Renderer::new(opt.template_directory.clone());
 
-    let database = rt.block_on(async move {
-        AppDatabase::new(&opt.connection_string).await
-    });
+    let database = rt.block_on(async move { AppDatabase::new(&opt.connection_string).await });
 
     let hit_counter = HitCounter::new(database.get_pool().clone(), handle.clone());
 
-    let config = clipstash::RocketConfig { renderer, database, hit_counter };
+    let config = clipstash::RocketConfig {
+        renderer,
+        database,
+        hit_counter,
+    };
 
     rt.block_on(async move {
         clipstash::rocket(config)
@@ -36,5 +38,4 @@ fn main() {
             .await
             .expect("failed to launch rocket server")
     });
-
 }
