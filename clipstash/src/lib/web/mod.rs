@@ -3,6 +3,9 @@ pub mod form;
 pub mod hitcounter;
 pub mod http;
 pub mod renderer;
+pub mod api;
+
+pub use hitcounter::HitCounter;
 
 pub const PASSWORD_COOKIE: &str = "password";
 
