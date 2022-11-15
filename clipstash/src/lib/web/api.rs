@@ -20,7 +20,7 @@ pub enum ApiKeyError {
     NotFound(String),
     #[error("invalid API key format")]
     #[response(status = 400, content_type = "json")]
-    DecodeError(String)
+    DecodeError(String),
 }
 
 #[derive(Debug, Clone)]
@@ -60,11 +60,11 @@ pub enum ApiError {
     #[error("server error")]
     #[response(status = 500, content_type = "json")]
     Server(Json<String>),
-    
+
     #[error("client error")]
     #[response(status = 401, content_type = "json")]
     User(Json<String>),
-    
+
     #[error("key error")]
     #[response(status = 400, content_type = "json")]
     Key(Json<ApiKeyError>),
