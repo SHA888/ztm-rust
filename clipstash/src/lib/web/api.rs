@@ -120,14 +120,11 @@ impl<'r> FromRequest<'r> for ApiKey {
             }
         }
     }
-
 }
 
 // Don't use in production. Need billing portal or customer service for api key
-#[rocket::get("/key")] 
-pub async fn  new_api_key(database: &State<AppDatabase>) 
-    -> Result<Json<&str>, ApiError> 
-{
+#[rocket::get("/key")]
+pub async fn new_api_key(database: &State<AppDatabase>) -> Result<Json<&str>, ApiError> {
     let api_key = action::generate_api_key(database.get_pool()).await?;
     println!("Api Key: {}", api_key.to_base64());
     Ok(Json("Api key generated. See log for details."))
@@ -150,9 +147,9 @@ pub async fn get_clip(
             .map(|cookie| cookie.value())
             .map(|raw_password| Password::new(raw_password.to_string()).ok())
             .flatten()
-            .unwrap_or_else(Password::default)
+            .unwrap_or_else(Password::default),
     };
-    
+
     let clip = action::get_clip(req, database.get_pool()).await?;
     hit_counter.hit(shortcode.into(), 1);
     Ok(Json(clip))
@@ -166,7 +163,6 @@ pub async fn new_clip(
 ) -> Result<Json<crate::Clip>, ApiError> {
     let clip = action::new_clip(req.into_inner(), database.get_pool()).await?;
     Ok(Json(clip))
-
 }
 
 #[rocket::put("/", data = "<req>")]
@@ -177,7 +173,6 @@ pub async fn update_clip(
 ) -> Result<Json<crate::Clip>, ApiError> {
     let clip = action::update_clip(req.into_inner(), database.get_pool()).await?;
     Ok(Json(clip))
-
 }
 
 pub fn routes() -> Vec<rocket::Route> {
@@ -217,6 +212,12 @@ pub mod catcher {
     }
 
     pub fn catchers() -> Vec<Catcher> {
-        catchers![not_found, default, internal_error, missing_api_key, request_error]
+        catchers![
+            not_found,
+            default,
+            internal_error,
+            missing_api_key,
+            request_error
+        ]
     }
 }

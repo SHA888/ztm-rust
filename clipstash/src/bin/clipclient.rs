@@ -1,6 +1,4 @@
-use clipstash::domain::clip::field::{
-    Content, Expires, Password, ShortCode, Title,
-};
+use clipstash::domain::clip::field::{Content, Expires, Password, ShortCode, Title};
 use clipstash::service::ask::{GetClip, NewClip, UpdateClip};
 use clipstash::web::api::{ApiKey, API_KEY_HEADER};
 use clipstash::Clip;
@@ -53,25 +51,54 @@ struct Opt {
 
 fn run(opt: Opt) -> Result<(), Box<dyn Error>> {
     match opt.command {
-        Command::Get { shortcode, password } => {
+        Command::Get {
+            shortcode,
+            password,
+        } => {
             let req = GetClip {
                 password: Password::new(password.unwrap_or_default())?,
                 shortcode,
             };
-            todo!()
-        },
-        Command::New { clip, password, expires, title  } => {
+            Ok(())
+        }
+        Command::New {
+            clip,
+            password,
+            expires,
+            title,
+        } => {
             let req = NewClip {
                 content: Content::new(clip.as_str())?,
                 title: title.unwrap_or_default(),
                 expires: expires.unwrap_or_default(),
                 password: password.unwrap_or_default(),
             };
-            todo!()
-        },
-        Command::Update { shortcode, clip, password, expires, title } => {
-            todo!()
-        },
+            Ok(())
+        }
+        Command::Update {
+            shortcode,
+            clip,
+            password,
+            expires,
+            title,
+        } => {
+            let password = password.unwrap_or_default();
+            let svc_req = GetClip {
+                password: password.clone(),
+                shortcode: shortcode.clone(),
+            };
+            let original_clip = get_clip(opt.addr.as_str(), svc_req, opt.api_key.clone())?;
+            let svc_req = UpdateClip {
+                content: Content::new(clip.as_str())?,
+                expires: expires.unwrap_or(original_clip.expires),
+                title: title.unwrap_or(original_clip.title),
+                password,
+                shortcode,
+            };
+            let clip = update_clip(opt.addr.as_str(), svc_req, opt.api_key)?;
+            println!("{:#?}", clip);
+            Ok(())
+        }
     }
 }
 
