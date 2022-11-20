@@ -1,3 +1,4 @@
+use chrono::format::format;
 use clipstash::domain::clip::field::{Content, Expires, Password, ShortCode, Title};
 use clipstash::service::ask::{GetClip, NewClip, UpdateClip};
 use clipstash::web::api::{ApiKey, API_KEY_HEADER};
@@ -49,6 +50,37 @@ struct Opt {
     api_key: ApiKey,
 }
 
+fn get_clip(addr: &str, ask_svc: GetClip, api_key: ApiKey) -> Result<Clip, Box<dyn Error>> {
+    let client = reqwest::blocking::Client::builder().build()?;
+    let addr = format!("{}/api/clip/{}", addr, ask_svc.shortcode.into_inner());
+    let mut request = client.get(addr);
+    request = match ask_svc.password.into_inner() {
+        Some(password) => request.header(
+            reqwest::header::COOKIE, 
+            format!("password={}", password)
+        ),
+        None => request,
+    };
+    request = request.header(API_KEY_HEADER, api_key.to_base64());
+    Ok(request.send()?.json()?)
+}
+
+fn new_clip(addr: &str, ask_svc: NewClip, api_key: ApiKey) -> Result<Clip, Box<dyn Error>> {
+    let client = reqwest::blocking::Client::builder().build()?;
+    let addr = format!("{}/api/clip/", addr);
+    let mut request = client.post(addr);
+    request = request.header(API_KEY_HEADER, api_key.to_base64());
+    Ok(request.json(&ask_svc).send()?.json()?)
+}
+
+fn update_clip(addr: &str, ask_svc: UpdateClip, api_key: ApiKey) -> Result<Clip, Box<dyn Error>> {
+    let client = reqwest::blocking::Client::builder().build()?;
+    let addr = format!("{}/api/clip/", addr);
+    let mut request = client.put(addr);
+    request = request.header(API_KEY_HEADER, api_key.to_base64());
+    Ok(request.json(&ask_svc).send()?.json()?)
+}
+
 fn run(opt: Opt) -> Result<(), Box<dyn Error>> {
     match opt.command {
         Command::Get {
@@ -59,6 +91,8 @@ fn run(opt: Opt) -> Result<(), Box<dyn Error>> {
                 password: Password::new(password.unwrap_or_default())?,
                 shortcode,
             };
+            let clip = get_clip(opt.addr.as_str(), req, opt.api_key)?;
+            println!("{:#?}", clip);
             Ok(())
         }
         Command::New {
@@ -73,6 +107,8 @@ fn run(opt: Opt) -> Result<(), Box<dyn Error>> {
                 expires: expires.unwrap_or_default(),
                 password: password.unwrap_or_default(),
             };
+            let clip = new_clip(opt.addr.as_str(), req, opt.api_key)?;
+            println!("{:#?}", clip);
             Ok(())
         }
         Command::Update {
