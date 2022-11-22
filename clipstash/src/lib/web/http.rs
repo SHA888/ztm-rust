@@ -11,11 +11,6 @@ use rocket::response::content::RawHtml;
 use rocket::response::{status, Redirect};
 use rocket::{uri, State};
 
-// use sqlx::database;
-// use structopt::clap::ErrorKind;
-
-// use super::renderer;
-
 #[rocket::get("/")]
 fn home(renderer: &State<Renderer<'_>>) -> RawHtml<String> {
     let context = ctx::Home::default();
@@ -208,5 +203,92 @@ pub mod catcher {
 
     pub fn catchers() -> Vec<Catcher> {
         catchers![not_found, default, internal_error]
+    }
+}
+
+#[cfg(test)]
+pub mod test {
+    use crate::data::AppDatabase;
+    use crate::test::async_runtime;
+    use crate::web::test::client;
+    use rocket::http::{Header, Status};
+
+    #[test]
+    fn gets_home() {
+        let client = client();
+        let response = client.get("/").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+    }
+
+    #[test]
+    fn error_on_missing_clip() {
+        let client = client();
+        let response = client.get("/clip/aasldfjkasldfkj").dispatch();
+        assert_eq!(response.status(), Status::NotFound);
+    }
+
+    #[test]
+    fn requires_password_when_applicable() {
+        use crate::domain::clip::field::{Content, Expires, Password, Title};
+        use crate::service;
+        use rocket::http::{ContentType, Cookie};
+
+        let rt = async_runtime();
+
+        let client = client();
+        let db = client.rocket().state::<AppDatabase>().unwrap();
+
+        let req = service::ask::NewClip {
+            content: Content::new("content").unwrap(),
+            expires: Expires::default(),
+            password: Password::new("1234".to_owned()).unwrap(),
+            title: Title::default(),
+        };
+
+        let clip = rt
+            .block_on(async move { service::action::new_clip(req, db.get_pool()).await })
+            .unwrap();
+
+        // Block clip when no password is provided
+        let response = client
+            .get(format!("/clip/{}", clip.shortcode.as_str()))
+            .dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
+
+        // Block clip when no password is provided
+        let response = client
+            .get(format!("/clip/raw/{}", clip.shortcode.as_str()))
+            .dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
+
+        // Get clip when the password is provided
+        let response = client
+            .post(format!("/clip/{}", clip.shortcode.as_str()))
+            .header(ContentType::Form)
+            .body("password=123")
+            .dispatch();
+        assert_eq!(response.status(), Status::Ok);
+
+        // Test the API key
+        // let response = client
+        //     .post(format!("/clip/{}", clip.shortcode.as_str()))
+        //     .header(Header::new(API_KEY_HEADER, api_key.as_base64()))
+        //     .body("password=123")
+        //     .dispatch();
+        // assert_eq!(response.status(), Status::Ok);
+
+        // Get clip when the password is provided
+        let response = client
+            .get(format!("/clip/raw/{}", clip.shortcode.as_str()))
+            .cookie(Cookie::new("password", "123"))
+            .dispatch();
+        assert_eq!(response.status(), Status::Ok);
+
+        // Password is provided, but incorrect
+        let response = client
+            .get(format!("/clip/raw/{}", clip.shortcode.as_str()))
+            .cookie(Cookie::new("password", "abc"))
+            .dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
     }
 }
