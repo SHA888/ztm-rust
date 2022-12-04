@@ -35,4 +35,32 @@ fn main() {
 }
 
 #[cfg(test)]
-mod test { }
+mod test {
+    use super::{sample_fn, Size};
+
+    macro_rules! multi_test {
+        // function_under_test:
+        // test_name -> (input, expected)
+        (
+            $fn:ident:
+            $( $name:ident -> $values:expr ),+
+            $(,)?
+        ) => {
+            $(
+                #[test]
+                fn $name() {
+                    assert_eq!($fn($values.0), $values.1);
+                }
+            )+
+        };
+    }
+
+    multi_test!(sample_fn:
+        sample_fn_small_min -> (0, Size::Small),
+        sample_fn_small_max -> (53, Size::Small),
+        sample_fn_medium_min -> (54, Size::Medium),
+        sample_fn_medium_max -> (154, Size::Medium),
+        sample_fn_large_min -> (155, Size::Large),
+        sample_fn_large_max -> (255, Size::Large),
+    );
+}
